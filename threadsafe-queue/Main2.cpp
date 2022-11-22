@@ -3,27 +3,38 @@
 #include <chrono>
 
 #include "MyQueue.h"
+#include "MyQueue2.h"
 
 using namespace std;
 
-MyQueue q(5);
+struct MyLog
+{
+	int id;
+	std::string info;
+
+	friend std::ostream& operator << (std::ostream& os, const MyLog& rhs)
+	{
+		os << "id: " << rhs.id << " info: " << rhs.info << std::endl;
+		return os; 
+	}
+};
+
+MyQueue2<MyLog> q(5);
 int g_logid;
 std::mutex g_Mutex;
-std::condition_variable g_Cv;
 bool g_Quit;
-int turn[2] = { 1, 0 };
 
 void func1()
 {
 	while (!g_Quit)
 	{
-		Log log;
+		MyLog log;
 		{
 			std::unique_lock<std::mutex> locker(g_Mutex);
 			log.id = g_logid;
 			log.info = std::to_string(g_logid);
 			g_logid++;
-			//std::cout << __FUNCTION__ << " " << log.id << "->" << log.info << std::endl;
+			//std::cout << __FUNCTION__ << " " << log << std::endl;
 		}
 
 		q.Push(log);
@@ -35,8 +46,8 @@ void func2()
 {
 	while (!g_Quit)
 	{
-		Log log = q.Pop();
-		//std::cout << __FUNCTION__ << " " << log.id << "->" << log.info << std::endl;
+		MyLog log = q.Pop();
+		//std::cout << __FUNCTION__ << " " << log << std::endl;
 		this_thread::sleep_for(chrono::seconds(1)); //ÐÝÃß1s
 	}
 }
@@ -45,13 +56,13 @@ void func3()
 {
 	while (!g_Quit)
 	{
-		Log log;
+		MyLog log;
 		{
 			std::unique_lock<std::mutex> locker(g_Mutex);
 			log.id = g_logid;
 			log.info = std::to_string(g_logid);
 			g_logid++;
-			//std::cout << __FUNCTION__ << " " << log.id << "->" << log.info << std::endl;
+			//std::cout << __FUNCTION__ << " " << log << std::endl;
 		}
 
 		q.Push(log);
@@ -63,8 +74,8 @@ void func4()
 {
 	while (!g_Quit)
 	{
-		Log log = q.Pop();
-		//std::cout << __FUNCTION__ << " " << log.id << "->" << log.info << std::endl;
+		MyLog log = q.Pop();
+		//std::cout << __FUNCTION__ << " " << log << std::endl;
 		this_thread::sleep_for(chrono::seconds(1)); //ÐÝÃß1s
 	}
 }
